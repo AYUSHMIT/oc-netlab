@@ -4,6 +4,9 @@ local tests = {
   "tests/test_ring.lua",
   "tests/test_filters.lua",
   "tests/test_schema.lua",
+  "tests/test_cli.lua",
+  "tests/test_capture.lua",
+  "tests/test_replay.lua",
 }
 
 local failures = 0

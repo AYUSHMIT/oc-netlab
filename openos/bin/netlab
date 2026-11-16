@@ -1,1 +1,1 @@
-return dofile("/bin/netlab.lua")
+return assert(loadfile("/bin/netlab.lua"))(...)

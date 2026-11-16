@@ -278,7 +278,7 @@ local function run_tui(options)
     local port = prompt_line("Filter port", state.filter.port)
     local remote = prompt_line("Remote address", state.filter.remote)
     local payload = prompt_line("Payload substring", state.filter.payload)
-    local payload_regex = prompt_line("Payload regex", state.filter.payload_regex)
+    local payload_regex = prompt_line("Payload Lua pattern", state.filter.payload_regex)
     local direction = prompt_line("Direction (inbound/outbound)", state.filter.direction)
     state.filter = {
       port = tonumber(port) or nil,
@@ -332,7 +332,7 @@ local function run_tui(options)
     end
     capture:stop()
     capture:unwrap_modem()
-    replay_dispatcher = Replay.new_dispatcher()
+    replay_dispatcher = Replay.new_dispatcher(event)
     capture = Capture.new({
       ring = ring,
       config = config,

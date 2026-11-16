@@ -46,8 +46,9 @@ function Capture:start()
     return true
   end
   self.listener = function(_, local_address, remote_address, port, distance, ...)
+    local payloads = { ... }
     local ok, err = pcall(function()
-      self:handle_inbound(local_address, remote_address, port, distance, { ... })
+      self:handle_inbound(local_address, remote_address, port, distance, payloads)
     end)
     if not ok then
       self.error_count = (self.error_count or 0) + 1
@@ -109,13 +110,13 @@ function Capture:wrap_modem()
   self._orig_send = self.modem.send
   self._orig_broadcast = self.modem.broadcast
   local capture = self
-  self.modem.send = function(_, address, port, ...)
+  self.modem.send = function(address, port, ...)
     capture:handle_outbound(address, port, { ... })
-    return capture._orig_send(_, address, port, ...)
+    return capture._orig_send(address, port, ...)
   end
-  self.modem.broadcast = function(_, port, ...)
+  self.modem.broadcast = function(port, ...)
     capture:handle_outbound("<broadcast>", port, { ... })
-    return capture._orig_broadcast(_, port, ...)
+    return capture._orig_broadcast(port, ...)
   end
 end
 
@@ -151,6 +152,7 @@ end
 
 function Capture:stop_file()
   if self.file then
+    self:flush()
     self.file:flush()
     self.file:close()
   end

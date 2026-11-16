@@ -2,7 +2,7 @@ local utils = require("netlab.utils")
 
 local replay = {}
 
-function replay.new_dispatcher()
+function replay.new_dispatcher(timer_api)
   local dispatcher = { listeners = {} }
   function dispatcher.listen(name, handler)
     dispatcher.listeners[name] = dispatcher.listeners[name] or {}
@@ -28,25 +28,11 @@ function replay.new_dispatcher()
       pcall(handler, name, ...)
     end
   end
-  function dispatcher.timer(interval, handler, times)
-    local count = 0
-    local id = { cancelled = false }
-    coroutine.wrap(function()
-      while not id.cancelled and (not times or count < times) do
-        utils.sleep(interval)
-        if id.cancelled then
-          break
-        end
-        count = count + 1
-        pcall(handler)
-      end
-    end)()
-    return id
-  end
-  function dispatcher.cancel(id)
-    if id then
-      id.cancelled = true
-    end
+  -- Scheduling belongs to OpenOS's event loop. A coroutine with no yield
+  -- blocks replay startup instead of installing a periodic flush callback.
+  if timer_api then
+    dispatcher.timer = timer_api.timer
+    dispatcher.cancel = timer_api.cancel
   end
   return dispatcher
 end
